@@ -1,0 +1,51 @@
+
+/* 
+#F2355B
+#191226
+#02A694
+#EFB704
+#F38902
+*/
+
+div#navi {
+	overflow: hidden;
+	width: 100%;
+	text-align: center;
+    position: fixed;
+    bottom: 0;
+    background: #F2355B;
+}
+
+div#navi select {
+	width: 100%;
+	padding: 1.4em;
+	cursor: pointer;
+	text-indent: 0.01px;
+	text-overflow: ellipsis;
+	border: none;
+	outline: none;
+	background: transparent;
+	background-image: none;
+	box-shadow: none;
+	-webkit-appearance: none;
+	appearance: none;
+	color: #ffffff;
+}
+
+div#navi select::-ms-expand {
+    display: none;
+}
+
+div#navi::before {
+	position: absolute;
+	top: 1.8em;
+	right: 1.8em;
+	width: 0;
+	height: 0;
+	padding: 0;
+	content: '';
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-top: 6px solid #ffffff;
+	pointer-events: none;
+}
