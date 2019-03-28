@@ -1,14 +1,29 @@
 
-$(function () {
-    var image = $('#camera')[0];
-    var imageString = imageToBase64(image);
+window.onload = async function () {
+    var camera = document.getElementById('camera');
+    var constraints = {
+        audio: false,
+        video: {
+            facingMode: 'environment'
+        }
+    };
 
-    callApi(imageString);
+    try {
+        var stream = await navigator.mediaDevices.getUserMedia(constraints);
+        camera.srcObject = stream;
+    }
+    catch (e) {
+        alert('Oops! Some error occurred.');
+    }
+    // var imageString = imageToBase64(image);
 
-    $('div#navi select').change(function (e) {
+    // callApi(imageString);
+
+    var select = document.getElementById('times');
+    select.onchange = function (e) {
         console.log(e);
-    });
-});
+    };
+};
 
 
 
