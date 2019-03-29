@@ -1,17 +1,20 @@
 
 window.onload = async function () {
     var camera = document.getElementById('camera');
+    var constraints = {
+        audio: false,
+        video: {
+            facingMode: 'environment'
+        }
+    };
 
     try {
         // カメラから画像を取得してリアルタイムで表示する
-        var stream = await navigator.mediaDevices.getUserMedia({
-            audio: false,
-            video: true
-        });
+        var stream = await navigator.mediaDevices.getUserMedia(constraints);
         camera.srcObject = stream;
     }
     catch (e) {
-        alert('Oops! Some error occurred.' + JSON.stringify(e));
+        alert('Oops! Some error occurred. ' + JSON.stringify(e));
         return;
     }
 
@@ -89,7 +92,7 @@ async function callApi(imageString) {
         }
     }
     catch (e) {
-        alert('Oops! Some error occurred.');
+        alert('Oops! Some error occurred. ' + JSON.stringify(e));
         clearCanvas();
         return;
     }
@@ -111,9 +114,12 @@ function clearCanvas() {
 
 
 function analyze(json) {
-    console.log(json[1]);
-    if (json[0] != undefined
-        && json.hasOwnProperty('textAnnotations')) {
-        console.log(json.textAnnotations)
+    if (json.responses[0].textAnnotations != undefined) {
+        var words = json.responses[0].textAnnotations;
+
+        for (var i = 0; i < words.length; i++) {
+            words[i].discription
+        }
+
     }
 }
