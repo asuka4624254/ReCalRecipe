@@ -1,4 +1,3 @@
-
 /* 
 #F2355B
 #191226
@@ -8,25 +7,26 @@
 */
 
 body {
-    background-color: #F4F3F0;
+	background-color: #F4F3F0;
+	font-family: "游ゴシック Medium", YuGothic, YuGothicM, "Hiragino Kaku Gothic ProN", "Hiragino Kaku Gothic Pro", メイリオ, Meiryo, sans-serif;
 }
 
 video#camera, canvas#info {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
 }
 
 div#navi {
 	overflow: hidden;
 	width: 100%;
 	text-align: center;
-    position: fixed;
-    bottom: 0;
-    background: #F2355B;
+	position: fixed;
+	bottom: 0;
+	background: #F2355B;
 }
 
 div#navi select {
@@ -46,7 +46,7 @@ div#navi select {
 }
 
 div#navi select::-ms-expand {
-    display: none;
+	display: none;
 }
 
 div#navi::before {
