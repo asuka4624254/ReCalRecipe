@@ -56,6 +56,7 @@ async function calculate() {
     ctx.drawImage(camera, 0, 0);
 
     // 読み込み中を表示
+    camera.pause();
     document.getElementById('loading').style.display = 'block';
 
     // 静止画をbase64エンコード
@@ -74,6 +75,7 @@ async function calculate() {
 
     // 読み込み中を非表示
     document.getElementById('loading').style.display = 'none';
+    camera.play();
 
     if (!result) {
         alert('Could not find stuff to recalculate!');
