@@ -9,21 +9,57 @@ window.onload = async function () {
     };
 
     try {
+        // カメラから画像を取得してリアルタイムで表示する
         var stream = await navigator.mediaDevices.getUserMedia(constraints);
         camera.srcObject = stream;
     }
     catch (e) {
         alert('Oops! Some error occurred.');
+        return;
     }
-    // var imageString = imageToBase64(image);
 
-    // callApi(imageString);
-
-    var select = document.getElementById('times');
-    select.onchange = function (e) {
-        console.log(e);
-    };
+    var canvas = document.getElementById('info');
+    canvas.onclick = canvas.ontouchstart = calculate;
 };
+
+
+
+var flag = false;
+
+async function calculate() {
+    var camera = document.getElementById('camera');
+    var canvas = document.getElementById('info');
+    var ctx = canvas.getContext('2d');
+
+    if (flag) {
+        // canvas の内容をクリア
+        clearCanvas();
+        flag = false;
+        return;
+    }
+
+    flag = true;
+
+    // タップしたときの静止画を表示
+    canvas.width = camera.videoWidth;
+    canvas.height = camera.videoHeight;
+    ctx.drawImage(camera, 0, 0);
+
+    // 読み込み中を表示
+    document.getElementById('loading').style.display = 'block';
+
+    // 静止画をbase64エンコード
+    var data = canvas.toDataURL();
+    var index = data.indexOf(',');
+    var dataString = data.slice(index + 1);
+
+    // GoogleのOCR APIを叩く
+    var json = await callApi(dataString);
+
+    console.log(json);
+
+    analyze(json);
+}
 
 
 
@@ -46,28 +82,41 @@ async function callApi(imageString) {
         }]
     }
 
-    var res = await fetch(apiUrl, {
-        method: 'POST',
-        body: JSON.stringify(body)
-    });
-    console.log(res.json());
+    try {
+        var res = await fetch(apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+            throw new Error();
+        }
+    }
+    catch (e) {
+        alert('Oops! Some error occurred.');
+        clearCanvas();
+        return;
+    }
+
+    return res.json();
 }
 
 
 
 /**
- * 画像をbase64エンコードする
+ * canvas の内容をクリア
  */
-function imageToBase64(image) {
-    var canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
-
+function clearCanvas() {
+    var canvas = document.getElementById('info');
     var ctx = canvas.getContext('2d');
-    ctx.drawImage(image, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 
-    var data = canvas.toDataURL();
-    var index = data.indexOf(',');
 
-    return data.slice(index + 1);
+
+function analyze(json) {
+    console.log(json[1]);
+    if (json[0] != undefined
+        && json.hasOwnProperty('textAnnotations')) {
+        console.log(json.textAnnotations)
+    }
 }
