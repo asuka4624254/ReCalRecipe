@@ -75,7 +75,6 @@ async function calculate() {
 
     // 読み込み中を非表示
     document.getElementById('loading').style.display = 'none';
-    camera.play();
 
     if (!result) {
         alert('Could not find stuff to recalculate!');
@@ -130,6 +129,7 @@ async function callApi(imageString) {
  */
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    camera.play();
 }
 
 
