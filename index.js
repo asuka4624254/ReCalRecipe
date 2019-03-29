@@ -32,6 +32,7 @@ window.onload = async function () {
     var select = document.getElementById('times');
     select.onchange = function (e) {
         times = e.target.value;
+        clearCanvas();
     }
 };
 
@@ -64,17 +65,18 @@ async function calculate() {
 
     // GoogleのOCR APIを叩く
     var json = await callApi(dataString);
-
     console.log(json);
 
+    // OCRの結果を解析
     var targets = analyze(json);
+    // canvas に再計算した数字を描画する
     var result = drawTargets(targets);
 
     // 読み込み中を非表示
     document.getElementById('loading').style.display = 'none';
 
     if (!result) {
-        alert('Could not find stuff to recal!');
+        alert('Could not find stuff to recalculate!');
         clearCanvas();
     }
     return;
@@ -130,43 +132,68 @@ function clearCanvas() {
 
 
 
+/**
+ * OCRの結果を解析
+ */
 function analyze(json) {
     var targets = [];
     if (json.responses[0].textAnnotations != undefined) {
         var words = json.responses[0].textAnnotations;
 
         for (var i = 0; i < words.length; i++) {
-            var result = words[i].description.match(/(カップ)*([0-9]+)(g|kg|cc|コ|カップ|本|さじ|パック)/iu);
+            var result = words[i].description.match(/(カップ|さじ)*([0-9]+)(g|kg|cc|コ|カップ|本|パック)/iu);
             if (result == null) continue;
-            console.log(result);
-            var target = [
-                Math.ceil(result[2] * times * 10) / 10, // 数字（再計算）
-                result[3], // 単位
-                words[i].boundingPoly.vertices // 座標
-            ]
+
+            var target = {
+                number: Math.ceil(result[2] * times * 10) / 10, // 数字（再計算）
+                unit: result[3], // 単位
+                vertices: words[i].boundingPoly.vertices // 座標
+            }
             targets.push(target);
         }
     }
-    console.log(targets)
     return targets;
 }
 
 
 
+/**
+ * canvas に再計算した数字を描画する
+ */
 function drawTargets(targets) {
     if (targets.length < 1) return false;
+    console.log(targets);
+
+    var fontSize = getFontSize(targets);
 
     for (var i = 0; i < targets.length; i++) {
-        var vertex = targets[i][2][0];
-        var x = 0;
-        var y = 0;
-        if (vertex.hasOwnProperty('x')) {
-            x = vertex.x;
-        }
-        if (vertex.hasOwnProperty('y')) {
-            y = vertex.y;
-        }
-        ctx.fillText(targets[i][0] + targets[i][1], x, y);
+        var vertex = targets[i].vertices[2];
+        var x = vertex.hasOwnProperty('x') ? vertex.x : 0;
+        var y = vertex.hasOwnProperty('y') ? vertex.y : 0;
+
+        ctx.font = fontSize + 'px Arial';
+        ctx.fillStyle = 'white';
+        ctx.fillText(targets[i].number + targets[i].unit, x, y);
     }
     return true;
+}
+
+
+
+/**
+ * フォントサイズの平均値を返す
+ */
+function getFontSize(targets) {
+    var total = 0;
+    var count = 0;
+    for (var i = 0; i < targets.length; i++) {
+        if (!targets[i].vertices[3].hasOwnProperty('y')
+            || !targets[i].vertices[3].hasOwnProperty('y')
+            || i == 0) {
+            continue;
+        }
+        total += targets[i].vertices[3].y - targets[i].vertices[0].y;
+        count++;
+    }
+    return Math.ceil(total / count);
 }
