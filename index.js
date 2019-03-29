@@ -2,16 +2,18 @@
 window.onload = async function () {
     var camera = document.getElementById('camera');
 
-    // カメラから画像を取得してリアルタイムで表示する
-    navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: false
-    }).then(function (stream) {
+    try {
+        // カメラから画像を取得してリアルタイムで表示する
+        var stream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: true
+        });
         camera.srcObject = stream;
-    }).catch(function (error) {
-        console.error('mediaDevice.getUserMedia() error: ', error);
+    }
+    catch (e) {
+        alert('Oops! Some error occurred.' + JSON.stringify(e));
         return;
-    });
+    }
 
     var canvas = document.getElementById('info');
     canvas.onclick = canvas.ontouchstart = calculate;
