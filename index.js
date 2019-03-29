@@ -1,6 +1,14 @@
 
+var camera;
+var canvas;
+var ctx;
+var times = 2;
+
 window.onload = async function () {
-    var camera = document.getElementById('camera');
+    camera = document.getElementById('camera');
+    canvas = document.getElementById('info');
+    ctx = canvas.getContext('2d');
+
     var constraints = {
         audio: false,
         video: {
@@ -18,8 +26,13 @@ window.onload = async function () {
         return;
     }
 
-    var canvas = document.getElementById('info');
+    // 画面タップで計算する
     canvas.onclick = canvas.ontouchstart = calculate;
+    // 計算の倍数を変更
+    var select = document.getElementById('times');
+    select.onchange = function (e) {
+        times = e.target.value;
+    }
 };
 
 
@@ -27,10 +40,6 @@ window.onload = async function () {
 var flag = false;
 
 async function calculate() {
-    var camera = document.getElementById('camera');
-    var canvas = document.getElementById('info');
-    var ctx = canvas.getContext('2d');
-
     if (flag) {
         // canvas の内容をクリア
         clearCanvas();
@@ -58,7 +67,17 @@ async function calculate() {
 
     console.log(json);
 
-    analyze(json);
+    var targets = analyze(json);
+    var result = drawTargets(targets);
+
+    // 読み込み中を非表示
+    document.getElementById('loading').style.display = 'none';
+
+    if (!result) {
+        alert('Could not find stuff to recal!');
+        clearCanvas();
+    }
+    return;
 }
 
 
@@ -106,20 +125,48 @@ async function callApi(imageString) {
  * canvas の内容をクリア
  */
 function clearCanvas() {
-    var canvas = document.getElementById('info');
-    var ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 
 
 function analyze(json) {
+    var targets = [];
     if (json.responses[0].textAnnotations != undefined) {
         var words = json.responses[0].textAnnotations;
 
         for (var i = 0; i < words.length; i++) {
-            words[i].discription
+            var result = words[i].description.match(/(カップ)*([0-9]+)(g|kg|cc|コ|カップ|本|さじ|パック)/iu);
+            if (result == null) continue;
+            console.log(result);
+            var target = [
+                Math.ceil(result[2] * times * 10) / 10, // 数字（再計算）
+                result[3], // 単位
+                words[i].boundingPoly.vertices // 座標
+            ]
+            targets.push(target);
         }
-
     }
+    console.log(targets)
+    return targets;
+}
+
+
+
+function drawTargets(targets) {
+    if (targets.length < 1) return false;
+
+    for (var i = 0; i < targets.length; i++) {
+        var vertex = targets[i][2][0];
+        var x = 0;
+        var y = 0;
+        if (vertex.hasOwnProperty('x')) {
+            x = vertex.x;
+        }
+        if (vertex.hasOwnProperty('y')) {
+            y = vertex.y;
+        }
+        ctx.fillText(targets[i][0] + targets[i][1], x, y);
+    }
+    return true;
 }
