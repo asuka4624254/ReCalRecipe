@@ -56,7 +56,6 @@ async function calculate() {
     ctx.drawImage(camera, 0, 0);
 
     // 読み込み中を表示
-    camera.pause();
     document.getElementById('loading').style.display = 'block';
 
     // 静止画をbase64エンコード
@@ -143,12 +142,32 @@ function analyze(json) {
         var words = json.responses[0].textAnnotations;
 
         for (var i = 0; i < words.length; i++) {
+            var number = null;
+            var unit = null;
+
             var result = words[i].description.match(/(カップ|さじ)*([0-9]+)(g|kg|cc|コ|カップ|本|パック)/iu);
-            if (result == null) continue;
+
+            if (result == null) {
+                number = words[i].description.match(/[0-9]+/iu);
+                if (words[i + 1]) {
+                    unit = words[i + 1].description.match(/g|kg|cc|コ|カップ|本|パック/iu);
+                }
+
+                if (number == null || unit == null) {
+                    continue;
+                }
+
+                number = number[0];
+                unit = unit[0];
+            }
+            else {
+                number = result[2];
+                unit = result[3];
+            };
 
             var target = {
-                number: Math.ceil(result[2] * times * 10) / 10, // 数字（再計算）
-                unit: result[3], // 単位
+                number: Math.ceil(number * times * 10) / 10, // 数字（再計算）
+                unit: unit, // 単位
                 vertices: words[i].boundingPoly.vertices // 座標
             }
             targets.push(target);
