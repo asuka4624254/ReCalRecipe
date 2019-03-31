@@ -90,7 +90,7 @@ async function calculate() {
  */
 async function callApi(imageString) {
     var url = 'https://vision.googleapis.com/v1/images:annotate';
-    var apiKey = 'AIzaSyCT5JIJSThwqHB1n1FMMgs6dXfy3Sd7OOo';
+    var apiKey = 'AIzaSyBePpoAr3J_W-FdbZGMgYRhDopY4Emlf7w';
     var apiUrl = url + '?key=' + apiKey;
 
     var body = {
