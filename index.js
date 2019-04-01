@@ -1,4 +1,12 @@
 
+var URL = 'https://vision.googleapis.com/v1/images:annotate';
+var API_KEY = 'AIzaSyBePpoAr3J_W-FdbZGMgYRhDopY4Emlf7w';
+
+var PREFIX_UNIT = ['カップ', 'さじ'];
+var SUFFIX_UNIT = ['g', 'kg', '㎏', 'cc', '㏄', 'ml', '㎖', 'コ', '個', 'カップ', '本', 'パック', '粒', '片', '枚'];
+
+
+
 var camera;
 var canvas;
 var ctx;
@@ -141,35 +149,58 @@ function analyze(json) {
         var words = json.responses[0].textAnnotations;
 
         for (var i = 0; i < words.length; i++) {
-            var number = null;
-            var unit = null;
+            var text = null;
 
-            var result = words[i].description.match(/(カップ|さじ)*([0-9]+)(g|kg|cc|コ|カップ|本|パック)/iu);
+            // ['100g']
+            var pattern = '^([0-9]+)(' + SUFFIX_UNIT.join('|') + ')*$';
+            var result = words[i].description.match(new RegExp(pattern, 'iu'));
+            if (result !== null && result[2] !== undefined) {
+                text = recalculate(result[1]) + result[2];
+                targets.push({
+                    text: text,
+                    vertices: words[i].boundingPoly.vertices // 座標
+                });
+                continue;
+            }
 
-            if (result == null) {
-                number = words[i].description.match(/[0-9]+/iu);
-                if (words[i + 1]) {
-                    unit = words[i + 1].description.match(/g|kg|cc|コ|カップ|本|パック/iu);
-                }
-
-                if (number == null || unit == null) {
+            // ['100', 'g'] のように次に続く数字を探す場合
+            if (result !== null && result[2] == undefined && words[i + 1]) {
+                var pattern = '^(' + SUFFIX_UNIT.join('|') + ')$';
+                var unit = words[i + 1].description.match(new RegExp(pattern, 'iu'));
+                if (unit !== null) {
+                    text = recalculate(result[1]) + unit[0];
+                    targets.push({
+                        text: text,
+                        vertices: words[i].boundingPoly.vertices // 座標
+                    });
                     continue;
                 }
-
-                number = number[0];
-                unit = unit[0];
             }
-            else {
-                number = result[2];
-                unit = result[3];
-            };
 
-            var target = {
-                number: Math.ceil(number * times * 10) / 10, // 数字（再計算）
-                unit: unit, // 単位
-                vertices: words[i].boundingPoly.vertices // 座標
+            // ['大さじ2'] のように分かれていない場合
+            var pattern = '^(.*[' + PREFIX_UNIT.join('') + '])([0-9]+)*$';
+            var result = words[i].description.match(new RegExp(pattern, 'iu'));
+            if (result !== null && result[2] !== undefined) {
+                text = result[1] + recalculate(result[2]);
+                targets.push({
+                    text: text,
+                    vertices: words[i].boundingPoly.vertices // 座標
+                });
+                continue;
             }
-            targets.push(target);
+
+            // ['大さじ', '2'] のように次に続く数字を探す場合
+            if (result !== null && result[2] == undefined && words[i + 1]) {
+                var pattern = '^([0-9]+)$';
+                var number = words[i + 1].description.match(new RegExp(pattern, 'iu'));
+                if (number !== null) {
+                    text = result[1] + recalculate(number[0]);
+                    targets.push({
+                        text: text,
+                        vertices: words[i].boundingPoly.vertices // 座標
+                    });
+                }
+            }
         }
     }
     return targets;
@@ -184,7 +215,7 @@ function drawTargets(targets) {
     if (targets.length < 1) return false;
     console.log(targets);
 
-    var fontSize = getFontSize(targets);
+    var fontSize = getFontSize(targets) + 1; // +の数字は調整
 
     for (var i = 0; i < targets.length; i++) {
         var vertex = targets[i].vertices[2];
@@ -192,8 +223,8 @@ function drawTargets(targets) {
         var y = vertex.hasOwnProperty('y') ? vertex.y : 0;
 
         ctx.font = fontSize + 'px Arial';
-        ctx.fillStyle = 'white';
-        ctx.fillText(targets[i].number + targets[i].unit, x, y);
+        ctx.fillStyle = '#F2355B';
+        ctx.fillText(targets[i].text, x, y);
     }
     return true;
 }
@@ -216,4 +247,12 @@ function getFontSize(targets) {
         count++;
     }
     return Math.ceil(total / count);
+}
+
+
+/**
+ * 再計算
+ */
+function recalculate(number) {
+    return Math.ceil(number * times * 10) / 10;
 }
