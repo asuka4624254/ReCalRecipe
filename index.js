@@ -27,7 +27,7 @@ window.onload = async function () {
     }
 
     // 画面タップで計算する
-    canvas.onclick = canvas.ontouchstart = calculate;
+    canvas.onclick = calculate;
     // 計算の倍数を変更
     var select = document.getElementById('times');
     select.onchange = function (e) {
@@ -128,7 +128,6 @@ async function callApi(imageString) {
  */
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    camera.play();
 }
 
 
