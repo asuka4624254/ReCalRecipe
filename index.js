@@ -171,7 +171,7 @@ function analyze(json) {
                     text = recalculate(result[1]) + unit[0];
                     targets.push({
                         text: text,
-                        vertices: words[i].boundingPoly.vertices // 座標
+                        vertices: words[i + 1].boundingPoly.vertices // 座標
                     });
                     continue;
                 }
@@ -197,7 +197,7 @@ function analyze(json) {
                     text = result[1] + recalculate(number[0]);
                     targets.push({
                         text: text,
-                        vertices: words[i].boundingPoly.vertices // 座標
+                        vertices: words[i + 1].boundingPoly.vertices // 座標
                     });
                 }
             }
@@ -213,7 +213,7 @@ function analyze(json) {
  */
 function drawTargets(targets) {
     if (targets.length < 1) return false;
-    console.log(targets);
+    // console.log(targets);
 
     var fontSize = getFontSize(targets) + 1; // +の数字は調整
 
