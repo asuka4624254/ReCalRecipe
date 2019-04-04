@@ -1,8 +1,5 @@
 # ReCalRecipe
 
-A small web app for mobile that reads characters from recipe book by camera and recalculates amount in recipe automatically.  
-https://recalrecipe.herokuapp.com/
-
 スマートフォンのカメラでレシピ本から文字を読み取り、レシピの分量を自動的に再計算するモバイル用の小さなWebアプリです。
 
 - 文字の認識（OCR）には Google Cloud Vision API を使用しています。
