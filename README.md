@@ -13,10 +13,9 @@ https://recalrecipe.herokuapp.com/
 
 ### どこかにデプロイする
 
-Herokuにデプロイしてみましたので、しばらくは以下のURLからアクセスできるかと思います。  
-https://recalrecipe.herokuapp.com/
+https://asuka4624254.github.io/ReCalRecipe/
 
-Herokuは継続的にアクセスがないと自動的にアクセスできなくなってしまうのと、GCPは無料の範囲で使っているのでそれを超えてしまうとOCRができずにエラーになるかもしれません。
+GCPは無料の範囲で使っているのでそれを超えてしまうとOCRができずにエラーになるかもしれません。
 
 自前でサーバにデプロイする場合は、カメラから画像を取り込む `navigator.mediaDevices.getUserMedia()` の都合で、HTTPSでないと動作しませんのでご注意ください。
 
